@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "IqzF2z6tcnhXLuFSBJuWpUhIOH4=",
+			"path": "github.com/shomali11/properties",
+			"revision": "7a1820e4ab70ced5411a445e04e33fd7f5d532e2",
+			"revisionTime": "2017-06-09T22:31:42Z"
+		}
+	],
+	"rootPath": "github.com/shomali11/commander"
+}
