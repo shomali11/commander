@@ -21,12 +21,13 @@ func init() {
 	parameterRegex = regexp.MustCompile(parameterPattern)
 }
 
+// NewCommand creates a new Command object from the format passed in
 func NewCommand(format string) *Command {
 	expression := compile(format)
 	return &Command{format: format, expression: expression}
 }
 
-// Command command
+// Command represents the Command object
 type Command struct {
 	format     string
 	expression *regexp.Regexp
