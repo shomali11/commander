@@ -1,4 +1,4 @@
-package main
+package commander
 
 import (
 	"github.com/shomali11/properties"
