@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/shomali11/properties"
 	"regexp"
 	"strings"
-	"github.com/shomali11/properties"
 )
 
 const (
@@ -28,7 +28,7 @@ func NewCommand(format string) *Command {
 
 // Command command
 type Command struct {
-	format string
+	format     string
 	expression *regexp.Regexp
 }
 
