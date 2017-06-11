@@ -2,6 +2,14 @@
 
 Command evaluator and parser
 
+# Usage
+
+Using `govendor` [github.com/kardianos/govendor](https://github.com/kardianos/govendor):
+
+```
+govendor fetch github.com/shomali11/commander
+```
+
 # Examples
 
 ```go
