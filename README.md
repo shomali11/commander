@@ -14,7 +14,7 @@ Command evaluator and parser
 * `proper` [github.com/shomali11/proper](https://github.com/shomali11/proper)
 
 
-# Usage
+## Usage
 
 Using `govendor` [github.com/kardianos/govendor](https://github.com/kardianos/govendor):
 
