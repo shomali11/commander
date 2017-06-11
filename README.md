@@ -12,6 +12,8 @@ govendor fetch github.com/shomali11/commander
 
 # Examples
 
+## Example 1
+
 In this example, we are matching a few strings against a command format, then parsing parameters if found or returning default values.
 
 ```go
@@ -38,6 +40,8 @@ func main() {
 	fmt.Println(properties.IntegerParam("number", 0)) // 0
 }
 ```
+
+## Example 2
 
 In this example, we are determining whether a token of the command format is a "Parameter". Parameters are surrounded by `<` and `>`
 
