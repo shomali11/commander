@@ -9,11 +9,6 @@ Command evaluator and parser
 * Provides default values for missing parameters
 * Supports String, Integer, Float and Boolean parameters
 
-## Dependencies
-
-* `proper` [github.com/shomali11/proper](https://github.com/shomali11/proper)
-
-
 ## Usage
 
 Using `govendor` [github.com/kardianos/govendor](https://github.com/kardianos/govendor):
@@ -21,6 +16,11 @@ Using `govendor` [github.com/kardianos/govendor](https://github.com/kardianos/go
 ```
 govendor fetch github.com/shomali11/commander
 ```
+
+## Dependencies
+
+* `proper` [github.com/shomali11/proper](https://github.com/shomali11/proper)
+
 
 # Examples
 
