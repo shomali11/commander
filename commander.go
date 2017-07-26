@@ -29,6 +29,11 @@ func NewCommand(format string) *command {
 	return &command{format: format, expression: expression}
 }
 
+type token struct {
+	Word        string
+	IsParameter bool
+}
+
 type command struct {
 	format     string
 	expression *regexp.Regexp
@@ -58,11 +63,6 @@ func (c *command) Match(text string) (*proper.Properties, bool) {
 		parameters[commandToken[1:len(commandToken)-1]] = resultToken
 	}
 	return proper.NewProperties(parameters), true
-}
-
-type token struct {
-	Word        string
-	IsParameter bool
 }
 
 // Tokenize returns command info as tokens
