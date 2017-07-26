@@ -22,6 +22,14 @@ func TestMatch(t *testing.T) {
 	assert.False(t, isMatch)
 	assert.Nil(t, properties)
 
+	properties, isMatch = NewCommand("help").Match("helpful")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
+
+	properties, isMatch = NewCommand("help").Match("Could you help me?")
+	assert.True(t, isMatch)
+	assert.NotNil(t, properties)
+
 	properties, isMatch = NewCommand("echo <word>").Match("echo")
 	assert.True(t, isMatch)
 	assert.NotNil(t, properties)
@@ -42,11 +50,11 @@ func TestMatch(t *testing.T) {
 }
 
 func TestIsParameter(t *testing.T) {
-	assert.True(t, IsParameter("<value>"))
-	assert.True(t, IsParameter("<123>"))
-	assert.True(t, IsParameter("<value123>"))
-	assert.False(t, IsParameter("value>"))
-	assert.False(t, IsParameter("<value"))
-	assert.False(t, IsParameter("value"))
-	assert.False(t, IsParameter(""))
+	assert.True(t, isParameter("<value>"))
+	assert.True(t, isParameter("<123>"))
+	assert.True(t, isParameter("<value123>"))
+	assert.False(t, isParameter("value>"))
+	assert.False(t, isParameter("<value"))
+	assert.False(t, isParameter("value"))
+	assert.False(t, isParameter(""))
 }
