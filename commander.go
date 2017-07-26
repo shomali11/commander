@@ -23,24 +23,26 @@ func init() {
 	parameterRegex = regexp.MustCompile(parameterPattern)
 }
 
-// NewCommand creates a new command object from the format passed in
-func NewCommand(format string) *command {
+// NewCommand creates a new Command object from the format passed in
+func NewCommand(format string) *Command {
 	expression := compile(format)
-	return &command{format: format, expression: expression}
+	return &Command{format: format, expression: expression}
 }
 
-type token struct {
+// Token represents the Token object
+type Token struct {
 	Word        string
 	IsParameter bool
 }
 
-type command struct {
+// Command represents the Command object
+type Command struct {
 	format     string
 	expression *regexp.Regexp
 }
 
 // Match takes in the command and the text received, attempts to find the pattern and extract the parameters
-func (c *command) Match(text string) (*proper.Properties, bool) {
+func (c *Command) Match(text string) (*proper.Properties, bool) {
 	if c.expression == nil {
 		return nil, false
 	}
@@ -65,15 +67,15 @@ func (c *command) Match(text string) (*proper.Properties, bool) {
 	return proper.NewProperties(parameters), true
 }
 
-// Tokenize returns command info as tokens
-func (c *command) Tokenize() []*token {
+// Tokenize returns Command info as tokens
+func (c *Command) Tokenize() []*Token {
 	words := strings.Split(c.format, space)
-	tokens := make([]*token, len(words))
+	tokens := make([]*Token, len(words))
 	for i, word := range words {
 		if isParameter(word) {
-			tokens[i] = &token{Word: word[1 : len(word)-1], IsParameter: true}
+			tokens[i] = &Token{Word: word[1 : len(word)-1], IsParameter: true}
 		} else {
-			tokens[i] = &token{Word: word, IsParameter: false}
+			tokens[i] = &Token{Word: word, IsParameter: false}
 		}
 	}
 	return tokens
