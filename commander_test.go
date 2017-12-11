@@ -31,6 +31,10 @@ func TestMatch(t *testing.T) {
 	assert.False(t, isMatch)
 	assert.Nil(t, properties)
 
+	properties, isMatch = NewCommand("abc").Match(".abc.")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
+
 	properties, isMatch = NewCommand("help").Match("helpful")
 	assert.False(t, isMatch)
 	assert.Nil(t, properties)
