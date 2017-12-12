@@ -118,8 +118,5 @@ func compile(tokens []*Token) *regexp.Regexp {
 		}
 	}
 	pattern += postCommandPattern
-
-	fmt.Println(pattern)
-
 	return regexp.MustCompile(ignoreCase + pattern)
 }
