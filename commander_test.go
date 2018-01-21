@@ -106,6 +106,10 @@ func TestMatch(t *testing.T) {
 	assert.False(t, isMatch)
 	assert.Nil(t, properties)
 
+	properties, isMatch = NewCommand("search all").Match("searching all")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
+
 	properties, isMatch = NewCommand("search all").Match("searchall")
 	assert.False(t, isMatch)
 	assert.Nil(t, properties)
@@ -122,13 +126,29 @@ func TestMatch(t *testing.T) {
 	assert.True(t, isMatch)
 	assert.NotNil(t, properties)
 
-	properties, isMatch = NewCommand("echo <word>").Match("echo")
+	properties, isMatch = NewCommand("echo <text>").Match("echo")
 	assert.True(t, isMatch)
 	assert.NotNil(t, properties)
 
-	properties, isMatch = NewCommand("echo <word>").Match("echo hey")
+	properties, isMatch = NewCommand("echo <text>").Match("echo.")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
+
+	properties, isMatch = NewCommand("echo <text>").Match("echoing")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
+
+	properties, isMatch = NewCommand("echo <text>").Match("echo hey")
 	assert.True(t, isMatch)
-	assert.Equal(t, properties.StringParam("word", ""), "hey")
+	assert.Equal(t, properties.StringParam("text", ""), "hey")
+
+	properties, isMatch = NewCommand("echo <text>").Match("echo hello world")
+	assert.True(t, isMatch)
+	assert.Equal(t, properties.StringParam("text", ""), "hello world")
+
+	properties, isMatch = NewCommand("echo <text>").Match("echoing hey")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
 
 	properties, isMatch = NewCommand("search <pattern>").Match("search *")
 	assert.True(t, isMatch)
@@ -143,6 +163,11 @@ func TestMatch(t *testing.T) {
 	assert.True(t, isMatch)
 	assert.Equal(t, properties.StringParam("word", ""), "hey")
 	assert.Equal(t, properties.IntegerParam("number", 0), 0)
+
+	properties, isMatch = NewCommand("repeat <text> <number>").Match("repeat hello world 10")
+	assert.True(t, isMatch)
+	assert.Equal(t, properties.StringParam("text", ""), "hello world")
+	assert.Equal(t, properties.IntegerParam("number", 0), 10)
 
 	properties, isMatch = NewCommand("calculate <number1> plus <number2>").Match("calculate 10 plus 5")
 	assert.True(t, isMatch)

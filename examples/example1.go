@@ -22,7 +22,7 @@ func main() {
 	fmt.Println(isMatch)
 	fmt.Println(properties)
 
-	properties, isMatch = commander.NewCommand("echo <word>").Match("echo")
+	properties, isMatch = commander.NewCommand("echo <text>").Match("echo")
 	fmt.Println(isMatch)
 	fmt.Println(properties)
 }

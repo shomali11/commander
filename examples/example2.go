@@ -6,9 +6,9 @@ import (
 )
 
 func main() {
-	properties, isMatch := commander.NewCommand("echo <word>").Match("echo hey")
+	properties, isMatch := commander.NewCommand("echo <text>").Match("echo hey")
 	fmt.Println(isMatch)
-	fmt.Println(properties.StringParam("word", ""))
+	fmt.Println(properties.StringParam("text", ""))
 
 	properties, isMatch = commander.NewCommand("repeat <word> <number>").Match("repeat hey 5")
 	fmt.Println(isMatch)
