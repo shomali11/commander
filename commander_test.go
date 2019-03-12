@@ -115,16 +115,16 @@ func TestMatch(t *testing.T) {
 	assert.Nil(t, properties)
 
 	properties, isMatch = NewCommand("help").Match("Could you help me?")
-	assert.False(t, isMatch)
-	assert.Nil(t, properties)
+	assert.True(t, isMatch)
+	assert.NotNil(t, properties)
 
 	properties, isMatch = NewCommand("help me").Match("Could you help me?")
 	assert.False(t, isMatch)
 	assert.Nil(t, properties)
 
 	properties, isMatch = NewCommand("help me").Match("please help me")
-	assert.False(t, isMatch)
-	assert.Nil(t, properties)
+	assert.True(t, isMatch)
+	assert.NotNil(t, properties)
 
 	properties, isMatch = NewCommand("echo <text>").Match("echo")
 	assert.True(t, isMatch)
