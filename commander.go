@@ -29,11 +29,25 @@ var (
 	regexCharacters = []string{"\\", "(", ")", "{", "}", "[", "]", "?", ".", "+", "|", "^", "$"}
 )
 
+type Options struct {
+	// SubExpressions should sub expressions with fewer parameters be created (default: true)
+	SubExpressions bool
+}
+
+type Option func(opts *Options)
+
 // NewCommand creates a new Command object from the format passed in
-func NewCommand(format string) *Command {
+func NewCommand(format string, options ...Option) *Command {
+	opts := createsOptions(options)
 	tokens := tokenize(format)
-	expressions := generate(tokens)
+	expressions := generate(tokens, opts)
 	return &Command{tokens: tokens, expressions: expressions}
+}
+
+func WithSubExpressions(value bool) Option {
+	return func(opts *Options) {
+		opts.SubExpressions = value
+	}
 }
 
 // Token represents the Token object
@@ -112,14 +126,19 @@ func tokenize(format string) []*Token {
 	return tokens
 }
 
-func generate(tokens []*Token) []*regexp.Regexp {
-	regexps := []*regexp.Regexp{}
+func generate(tokens []*Token, opts *Options) []*regexp.Regexp {
+	var regexps []*regexp.Regexp
 	if len(tokens) == 0 {
 		return regexps
 	}
 
-	for index := len(tokens) - 1; index >= -1; index-- {
-		regex := compile(create(tokens, index))
+	if opts.SubExpressions {
+		for index := len(tokens) - 1; index >= -1; index-- {
+			regex := compile(create(tokens, index))
+			regexps = append(regexps, regex)
+		}
+	} else {
+		regex := compile(create(tokens, len(tokens)-1))
 		regexps = append(regexps, regex)
 	}
 
@@ -160,4 +179,16 @@ func getInputPattern(token *Token) string {
 	default:
 		return escape(token.Word)
 	}
+}
+
+func createsOptions(options []Option) *Options {
+	opts := &Options{
+		SubExpressions: true,
+	}
+
+	for _, option := range options {
+		option(opts)
+	}
+
+	return opts
 }

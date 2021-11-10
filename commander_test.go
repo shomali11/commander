@@ -202,6 +202,9 @@ func TestMatch(t *testing.T) {
 	assert.Equal(t, properties.IntegerParam("number1", 0), 0)
 	assert.Equal(t, properties.IntegerParam("number2", 0), 0)
 
+	properties, isMatch = NewCommand("<number1> + <number2>", WithSubExpressions(false)).Match("+")
+	assert.False(t, isMatch)
+
 	properties, isMatch = NewCommand("\\ ( ) { } [ ] ? . + | ^ $").Match("\\ ( ) { } [ ] ? . + | ^ $")
 	assert.True(t, isMatch)
 	assert.NotNil(t, properties)
