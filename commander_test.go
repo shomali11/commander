@@ -206,3 +206,49 @@ func TestMatch(t *testing.T) {
 	assert.True(t, isMatch)
 	assert.NotNil(t, properties)
 }
+
+func TestExactMatch(t *testing.T) {
+	properties, isMatch := NewCommand("help", WithExactMatch(true)).Match("help")
+	assert.True(t, isMatch)
+	assert.NotNil(t, properties)
+
+	properties, isMatch = NewCommand("help", WithExactMatch(true)).Match("  help")
+	assert.True(t, isMatch)
+	assert.NotNil(t, properties)
+
+	properties, isMatch = NewCommand("help", WithExactMatch(true)).Match("help  ")
+	assert.True(t, isMatch)
+	assert.NotNil(t, properties)
+
+	properties, isMatch = NewCommand("help", WithExactMatch(true)).Match("please help")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
+
+	properties, isMatch = NewCommand("help", WithExactMatch(true)).Match("help me")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
+
+	properties, isMatch = NewCommand("echo <text>", WithExactMatch(true)).Match("echo")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
+
+	properties, isMatch = NewCommand("echo <text>", WithExactMatch(true)).Match("echo  ")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
+
+	properties, isMatch = NewCommand("echo <text>", WithExactMatch(true)).Match("  echo")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
+
+	properties, isMatch = NewCommand("echo <text>", WithExactMatch(true)).Match("  echo hello world")
+	assert.True(t, isMatch)
+	assert.Equal(t, properties.StringParam("text", ""), "hello world")
+
+	properties, isMatch = NewCommand("echo <text>", WithExactMatch(true)).Match("blah echo hello world")
+	assert.False(t, isMatch)
+	assert.Nil(t, properties)
+
+	properties, isMatch = NewCommand("echo <text>", WithExactMatch(true)).Match("echo 1")
+	assert.True(t, isMatch)
+	assert.Equal(t, properties.StringParam("text", ""), "1")
+}

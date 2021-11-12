@@ -12,11 +12,6 @@ const (
 	ignoreCase           = "(?i)"
 	parameterPattern     = "<\\S+>"
 	lazyParameterPattern = "<\\S+\\?>"
-	spacePattern         = "\\s+"
-	inputPattern         = "(.+)"
-	lazyInputPattern     = "(.+?)"
-	preCommandPattern    = "(\\s|^)"
-	postCommandPattern   = "(\\s|$)"
 )
 
 const (
@@ -29,11 +24,31 @@ var (
 	regexCharacters = []string{"\\", "(", ")", "{", "}", "[", "]", "?", ".", "+", "|", "^", "$"}
 )
 
+type Options struct {
+	// If exact match is set, matching requires the command to begin at the start of input, and contain no extra output
+	PatternSet *patternSet
+}
+
+type Option func(opts *Options)
+
+// WithExactMatch requires that the command contains all parameters, and has no additional starting/ending text.
+// ex: NewCommand("help", WithExactMatch(true)) -> "help me" doesn't match, while "  help  " will.
+func WithExactMatch(m bool) Option {
+	return func(opts *Options) {
+		if m {
+			opts.PatternSet = &exactMatchPatternSet
+		} else {
+			opts.PatternSet = &defaultCommandPatternSet
+		}
+	}
+}
+
 // NewCommand creates a new Command object from the format passed in
-func NewCommand(format string) *Command {
+func NewCommand(format string, options ...Option) *Command {
+	opts := createsOptions(options)
 	tokens := tokenize(format)
-	expressions := generate(tokens)
-	return &Command{tokens: tokens, expressions: expressions}
+	expressions := generate(tokens, opts)
+	return &Command{tokens: tokens, expressions: expressions, opts: opts}
 }
 
 // Token represents the Token object
@@ -48,6 +63,7 @@ func (t Token) IsParameter() bool {
 
 // Command represents the Command object
 type Command struct {
+	opts        *Options
 	tokens      []*Token
 	expressions []*regexp.Regexp
 }
@@ -58,13 +74,14 @@ func (c *Command) Match(text string) (*proper.Properties, bool) {
 		return nil, false
 	}
 
+	matchOffset := c.opts.PatternSet.MatchOffset
 	for _, expression := range c.expressions {
 		matches := expression.FindStringSubmatch(text)
 		if len(matches) == 0 {
 			continue
 		}
 
-		values := matches[2 : len(matches)-1]
+		values := matches[matchOffset : len(matches)-1]
 
 		valueIndex := 0
 		parameters := make(map[string]string)
@@ -112,14 +129,20 @@ func tokenize(format string) []*Token {
 	return tokens
 }
 
-func generate(tokens []*Token) []*regexp.Regexp {
+func generate(tokens []*Token, opts *Options) []*regexp.Regexp {
 	regexps := []*regexp.Regexp{}
 	if len(tokens) == 0 {
 		return regexps
 	}
 
+	// Don't generate variations on exact match
+	if opts.PatternSet.ExactMatch {
+		regexps = append(regexps, compile(tokens, opts))
+		return regexps
+	}
+
 	for index := len(tokens) - 1; index >= -1; index-- {
-		regex := compile(create(tokens, index))
+		regex := compile(create(tokens, index), opts)
 		regexps = append(regexps, regex)
 	}
 
@@ -136,28 +159,40 @@ func create(tokens []*Token, boundary int) []*Token {
 	return newTokens
 }
 
-func compile(tokens []*Token) *regexp.Regexp {
+func compile(tokens []*Token, opts *Options) *regexp.Regexp {
 	if len(tokens) == 0 {
 		return nil
 	}
-
-	pattern := preCommandPattern + getInputPattern(tokens[0])
+	patterns := opts.PatternSet
+	pattern := patterns.PreCommandPattern + getInputPattern(tokens[0], patterns)
 	for index := 1; index < len(tokens); index++ {
 		currentToken := tokens[index]
-		pattern += spacePattern + getInputPattern(currentToken)
+		pattern += patterns.SpacePattern + getInputPattern(currentToken, patterns)
 	}
-	pattern += postCommandPattern
+	pattern += patterns.PostCommandPattern
 
 	return regexp.MustCompile(ignoreCase + pattern)
 }
 
-func getInputPattern(token *Token) string {
+func getInputPattern(token *Token, patterns *patternSet) string {
 	switch token.Type {
 	case lazyParameter:
-		return lazyInputPattern
+		return patterns.LazyInputPattern
 	case greedyParameter:
-		return inputPattern
+		return patterns.InputPattern
 	default:
 		return escape(token.Word)
 	}
+}
+
+func createsOptions(options []Option) *Options {
+	opts := &Options{
+		PatternSet: &defaultCommandPatternSet,
+	}
+
+	for _, option := range options {
+		option(opts)
+	}
+
+	return opts
 }
