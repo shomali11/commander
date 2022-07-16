@@ -8,6 +8,7 @@ Command evaluator and parser
 * Extracts parameters from matching input
 * Provides default values for missing parameters
 * Supports String, Integer, Float and Boolean parameters
+* Supports "word" {} vs "sentence" <> parameter matching
 
 ## Dependencies
 
@@ -29,25 +30,42 @@ import (
 )
 
 func main() {
-	properties, isMatch := commander.NewCommand("echo <text>").Match("echo hey")
-	fmt.Println(isMatch)                             // true
-	fmt.Println(properties.StringParam("text", ""))  // hey
+	properties, isMatch := commander.NewCommand("ping").Match("ping")
+	fmt.Println(isMatch)            // true
+	fmt.Println(properties)         // {}
 
-	properties, isMatch = commander.NewCommand("repeat <word> <number>").Match("repeat hey 5")
-	fmt.Println(isMatch)                              // true
-	fmt.Println(properties.StringParam("word", ""))   // hey
-	fmt.Println(properties.IntegerParam("number", 0)) // 5
+	properties, isMatch = commander.NewCommand("ping").Match("pong")
+	fmt.Println(isMatch)            // false
+	fmt.Println(properties)         // nil
 
-	properties, isMatch = commander.NewCommand("repeat <word> <number>").Match("repeat hey")
-	fmt.Println(isMatch)                              // true
-	fmt.Println(properties.StringParam("word", ""))   // hey
-	fmt.Println(properties.IntegerParam("number", 0)) // 0
+	properties, isMatch = commander.NewCommand("echo {word}").Match("echo hello world!")
+	fmt.Println(isMatch)                               // true
+	fmt.Println(properties.StringParam("word", ""))    // hello
+
+	properties, isMatch = commander.NewCommand("echo <sentence>").Match("echo hello world!")
+	fmt.Println(isMatch)                                   // true
+	fmt.Println(properties.StringParam("sentence", ""))    // hello world!
+
+	properties, isMatch = commander.NewCommand("repeat {word} {number}").Match("repeat hey 5")
+	fmt.Println(isMatch)                                 // true
+	fmt.Println(properties.StringParam("word", ""))      // hey
+	fmt.Println(properties.IntegerParam("number", 0))    // 5
+
+	properties, isMatch = commander.NewCommand("repeat {word} {number}").Match("repeat hey")
+	fmt.Println(isMatch)                                 // true
+	fmt.Println(properties.StringParam("word", ""))      // hey
+	fmt.Println(properties.IntegerParam("number", 0))    // 0
+
+	properties, isMatch = commander.NewCommand("search <stuff> {size}").Match("search hello there everyone 10")
+	fmt.Println(isMatch)                                // true
+	fmt.Println(properties.StringParam("stuff", ""))    // hello there everyone
+	fmt.Println(properties.IntegerParam("size", 0))     // 10
 }
 ```
 
 ## Example 2
 
-In this example, we are tokenizing the command format and returning each token with a boolean that determines whether it is a parameter or not
+In this example, we are tokenizing the command format and returning each token with a number that determines whether it is a parameter (word vs sentence) or not
 
 ```go
 package main
@@ -58,7 +76,7 @@ import (
 )
 
 func main() {
-	tokens := commander.NewCommand("echo <text>").Tokenize()
+	tokens := commander.NewCommand("echo {word} <sentence>").Tokenize()
 	for _, token := range tokens {
 		fmt.Println(token)
 	}
@@ -67,6 +85,7 @@ func main() {
 
 Output:
 ```
-&{echo false}
-&{text true}
+&{echo NOT_PARAMETER}
+&{word WORD_PARAMETER}
+&{sentence SENTENCE_PARAMETER}
 ```

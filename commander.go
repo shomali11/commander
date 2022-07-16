@@ -8,21 +8,21 @@ import (
 )
 
 const (
-	escapeCharacter      = "\\"
-	ignoreCase           = "(?i)"
-	parameterPattern     = "<\\S+>"
-	lazyParameterPattern = "<\\S+\\?>"
-	spacePattern         = "\\s+"
-	inputPattern         = "(.+)"
-	lazyInputPattern     = "(.+?)"
-	preCommandPattern    = "(\\s|^)"
-	postCommandPattern   = "(\\s|$)"
+	escapeCharacter          = "\\"
+	ignoreCase               = "(?i)"
+	wordParameterPattern     = "{\\S+}"
+	sentenceParameterPattern = "<\\S+>"
+	spacePattern             = "\\s+"
+	wordInputPattern         = "(.+?)"
+	sentenceInputPattern     = "(.+)"
+	preCommandPattern        = "(\\s|^)"
+	postCommandPattern       = "(\\s|$)"
 )
 
 const (
-	notParameter = iota
-	greedyParameter
-	lazyParameter
+	notParameter      = "NOT_PARAMETER"
+	wordParameter     = "WORD_PARAMETER"
+	sentenceParameter = "SENTENCE_PARAMETER"
 )
 
 var (
@@ -39,7 +39,7 @@ func NewCommand(format string) *Command {
 // Token represents the Token object
 type Token struct {
 	Word string
-	Type int
+	Type string
 }
 
 func (t Token) IsParameter() bool {
@@ -95,16 +95,16 @@ func escape(text string) string {
 }
 
 func tokenize(format string) []*Token {
-	parameterRegex := regexp.MustCompile(parameterPattern)
-	lazyParameterRegex := regexp.MustCompile(lazyParameterPattern)
+	parameterRegex := regexp.MustCompile(sentenceParameterPattern)
+	lazyParameterRegex := regexp.MustCompile(wordParameterPattern)
 	words := strings.Fields(format)
 	tokens := make([]*Token, len(words))
 	for i, word := range words {
 		switch {
 		case lazyParameterRegex.MatchString(word):
-			tokens[i] = &Token{Word: word[1 : len(word)-2], Type: lazyParameter}
+			tokens[i] = &Token{Word: word[1 : len(word)-1], Type: wordParameter}
 		case parameterRegex.MatchString(word):
-			tokens[i] = &Token{Word: word[1 : len(word)-1], Type: greedyParameter}
+			tokens[i] = &Token{Word: word[1 : len(word)-1], Type: sentenceParameter}
 		default:
 			tokens[i] = &Token{Word: word, Type: notParameter}
 		}
@@ -153,10 +153,10 @@ func compile(tokens []*Token) *regexp.Regexp {
 
 func getInputPattern(token *Token) string {
 	switch token.Type {
-	case lazyParameter:
-		return lazyInputPattern
-	case greedyParameter:
-		return inputPattern
+	case wordParameter:
+		return wordInputPattern
+	case sentenceParameter:
+		return sentenceInputPattern
 	default:
 		return escape(token.Word)
 	}

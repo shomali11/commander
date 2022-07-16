@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	tokens := commander.NewCommand("echo <word>").Tokenize()
+	tokens := commander.NewCommand("echo {word} <sentence>").Tokenize()
 	for _, token := range tokens {
 		fmt.Println(token)
 	}
