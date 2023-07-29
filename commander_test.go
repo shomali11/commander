@@ -232,3 +232,30 @@ func TestMatch(t *testing.T) {
 	assert.True(t, isMatch)
 	assert.NotNil(t, properties)
 }
+
+func TestNewCommand(t *testing.T) {
+	tests := []struct {
+		name           string
+		in             string
+		wantTokens     int
+		wantExpresions int
+	}{
+		{"simple command", "ping", 1, 2},
+		{"command and parameter", "say <input>", 2, 3},
+		{"no command", "", 0, 0},
+		{"all tokens are parameter", "<a> <123> <a123> <a-123> <a.123>", 5, 5},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := NewCommand(tt.in)
+			if got := len(cmd.tokens); got != tt.wantTokens {
+				t.Errorf("got tokens %v, want %v", got, tt.wantTokens)
+			}
+			if got := len(cmd.expressions); got != tt.wantExpresions {
+				t.Errorf("got expressions %v, want %v", got, tt.wantExpresions)
+			}
+			// Check no panic
+			_, _ = cmd.Match("")
+		})
+	}
+}
