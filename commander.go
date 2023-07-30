@@ -120,7 +120,9 @@ func generate(tokens []*Token) []*regexp.Regexp {
 
 	for index := len(tokens) - 1; index >= -1; index-- {
 		regex := compile(create(tokens, index))
-		regexps = append(regexps, regex)
+		if regex != nil {
+			regexps = append(regexps, regex)
+		}
 	}
 
 	return regexps
